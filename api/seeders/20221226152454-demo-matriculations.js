@@ -1,45 +1,45 @@
 module.exports = {
   up: (queryInterface, Sequelize) => {
-		return queryInterface.bulkInsert('Matriculas', [
+		return queryInterface.bulkInsert('Matriculations', [
 			{
-				status: "confirmado",
-				id_aluno: 1,
-				id_turma: 1,
+				status: "confirmed",
+				student_id: 1,
+				class_id: 1,
 				createdAt: new Date(),
 				updatedAt: new Date()
 		},
 		{
-			status: "confirmado",
-			id_aluno: 2,
-			id_turma: 1,
+			status: "confirmed",
+			student_id: 2,
+			class_id: 1,
 			createdAt: new Date(),
 			updatedAt: new Date()
 	},
 		{
-			status: "confirmado",
-			id_aluno: 3,
-			id_turma: 2,
+			status: "confirmed",
+			student_id: 3,
+			class_id: 2,
 			createdAt: new Date(),
 			updatedAt: new Date()
 	},
 		{
-			status: "confirmado",
-			id_aluno: 4,
-			id_turma: 3,
+			status: "confirmed",
+			student_id: 4,
+			class_id: 3,
 			createdAt: new Date(),
 			updatedAt: new Date()
 	},
 		{
-			status: "cancelado",
-			id_aluno: 1,
-			id_turma: 2,
+			status: "canceled",
+			student_id: 1,
+			class_id: 2,
 			createdAt: new Date(),
 			updatedAt: new Date()
 	},
 		{
-			status: "cancelado",
-			id_aluno: 2,
-			id_turma: 2,
+			status: "canceled",
+			student_id: 2,
+			class_id: 2,
 			createdAt: new Date(),
 			updatedAt: new Date()
 		}
@@ -47,6 +47,6 @@ module.exports = {
   },
 
   down: (queryInterface, Sequelize) => {
-		return queryInterface.bulkDelete('Matriculas', null, {})
+		return queryInterface.bulkDelete('Matriculations', null, {})
   }
 }

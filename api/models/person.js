@@ -10,7 +10,8 @@ module.exports = (sequelize, DataTypes) => {
     role: DataTypes.STRING
   }, {});
   People.associate = function(models) {
-    // associations can be defined here
+    People.hasMany(models.Classes)
+    People.hasMany(models.Matriculations)
   };
   return People;
 };
