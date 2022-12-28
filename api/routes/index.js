@@ -1,7 +1,6 @@
 const bodyParser = require('body-parser')
 const classesRouter = require('./classesRoute')
 const levelRouter = require('./levelRoute')
-const matriculationRouter = require('./matriculationRoute')
 const peopleRouter = require('./peopleRoute')
 
 const Routes = app => {
@@ -10,7 +9,6 @@ const Routes = app => {
     bodyParser.json(),
     peopleRouter,
     classesRouter,
-    matriculationRouter,
     levelRouter
   )
 
