@@ -1,17 +1,18 @@
 const db = require('../models');
 
-class PeopleController {
+class ClassController {
 
-  static findAllPeople = async (req, res) => {
+  static findAllClasses = async (req, res) => {
+    
     const query = req.query;
     try {
 
       if (!query) {
-        const search = await db.People.findAll()
+        const search = await db.Classes.findAll()
         return res.status(200).json(search)
       }
 
-      const search = await db.People.findAll({
+      const search = await db.Classes.findAll({
         where: query
       })
 
@@ -24,29 +25,34 @@ class PeopleController {
     }
   }
 
-  static findPerson = async (req, res) => {
+  static findClass = async (req, res) => {
 
     const { id } = req.params
+
     try {
-      const search = await db.People.findOne({
+      const search = await db.Classes.findOne({
         where: {
           id: Number(id)
         }
       })
+
+      if(!search) throw new Error(search);
+
       res.status(200).json(search)
     } catch (err) {
-      res.status(500).json(err.message)
+
+      res.status(500).json("Não foi possível encontra a pessoa que solicitou, reveja as query...")
     }
   }
 
-  static updatePerson = async (req, res) => {
+  static updateClass = async (req, res) => {
 
     const body = req.body;
     const { id } = req.params;
 
     try {
 
-      const updatedPerson = await db.People.update(body, {
+      const updatedPerson = await db.Classes.update(body, {
         where: {
           id: id
         }
@@ -62,12 +68,12 @@ class PeopleController {
 
   }
 
-  static addPerson = async (req, res) => {
+  static addClass = async (req, res) => {
 
     const person = req.body;
     try {
 
-      const personCreated = await db.People.create(person)
+      const personCreated = await db.Classes.create(person)
 
       res.status(200).json(personCreated)
     } catch (err) {
@@ -75,11 +81,11 @@ class PeopleController {
     }
   }
 
-  static removePersonById = async (req, res) => {
+  static removeClassById = async (req, res) => {
 
     const { id } = req.params
     try {
-      const search = await db.People.destroy({
+      const search = await db.Classes.destroy({
         where: {
           id: Number(id)
         }
@@ -93,11 +99,11 @@ class PeopleController {
     }
   }
 
-  static removePersonByQuery = async (req, res) => {
+  static removeClassByQuery = async (req, res) => {
 
     const query = req.query
     try {
-      const search = await db.People.destroy({
+      const search = await db.Classes.destroy({
         where: query
       })
 
@@ -113,4 +119,4 @@ class PeopleController {
 
 
 
-module.exports = PeopleController;
+module.exports = ClassController;

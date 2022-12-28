@@ -1,6 +1,6 @@
 'use strict';
 
-const sequelize = require("sequelize");
+const sequelize = require('sequelize');
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -18,16 +18,16 @@ module.exports = {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "People",
-          key: "id"
+          model: 'People',
+          key: 'id'
         }
       },
       level_id: {
         allowNull: false,
         type: Sequelize.INTEGER,
         references: {
-          model: "Levels",
-          key: "id"
+          model: 'Levels',
+          key: 'id'
         }
       },
       createdAt: {

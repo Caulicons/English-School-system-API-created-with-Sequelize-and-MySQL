@@ -4,7 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     level_description: DataTypes.STRING
   }, {});
   Levels.associate = function (models) {
-    Levels.hasMany(models.Classes)
+    Levels.hasMany(models.Classes, {
+      foreignKey: 'level_id'
+    })
   };
   return Levels;
 };

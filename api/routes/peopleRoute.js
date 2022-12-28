@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const PeopleController = require("../controller/peopleController");
+const PeopleController = require("../controllers/PeopleController");
 
 const peopleRouter = Router();
 
@@ -11,5 +11,4 @@ const peopleRouter = Router();
     .delete('/people/:id', PeopleController.removePersonById)
     .delete('/people/', PeopleController.removePersonByQuery)
     
-
 module.exports = peopleRouter;

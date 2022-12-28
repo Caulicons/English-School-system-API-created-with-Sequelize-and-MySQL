@@ -4,9 +4,12 @@ module.exports = (sequelize, DataTypes) => {
     start_date: DataTypes.DATEONLY
   }, {});
   Classes.associate = function(models) {
-    Classes.hasMany(models.Matriculations)
-    Classes.belongsTo(models.People)
-    Classes.belongsTo(models.Levels)
+    Classes.belongsTo(models.People, {
+      foreignKey: 'teacher_id'
+    })
+    Classes.belongsTo(models.Levels, {
+      foreignKey: 'level_id'
+    })
   };
   return Classes;
 };
