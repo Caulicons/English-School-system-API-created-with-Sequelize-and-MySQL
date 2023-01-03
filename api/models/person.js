@@ -3,18 +3,46 @@ module.exports = (sequelize, DataTypes) => {
 	const People = sequelize.define('People', {
 		name: {
 			type: DataTypes.STRING,
-			allowNull: false
+			validate: {
+				length: (data) => {
+					if (data.length < 4) throw new Error('name field must be at least 3 characters');
+				}
+			}
 		},
 		active: DataTypes.BOOLEAN,
-		email: DataTypes.STRING,
+		email: {
+			type: DataTypes.STRING,
+			validate: {
+				isEmail: {
+					args: true,
+					msg: 'the text is not in the format email'
+				}
+			}
+		},
 		role: DataTypes.STRING
-	}, {});
+	}, {
+		defaultScope: {
+			where: {
+				active: true
+			}
+		},
+		scopes: {
+			all: {
+				where: {}
+			}
+		},
+		paranoid: true
+	});
 	People.associate = function (models) {
 		People.hasMany(models.Classes, {
 			foreignKey: 'teacher_id'
 		});
 		People.hasMany(models.Matriculations, {
-			foreignKey: 'student_id'
+			foreignKey: 'student_id',
+			scope: {
+				status: 'confirmed'
+			},
+			as: 'confirmedMatriculations'
 		});
 	};
 	return People;

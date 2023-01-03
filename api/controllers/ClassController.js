@@ -1,29 +1,8 @@
 const db = require('../models');
+const { Op, literal } = require('sequelize');
+
 
 class ClassController {
-
-	static findAllClasses = async (req, res) => {
-    
-		const query = req.query;
-		try {
-
-			if (!query) {
-				const search = await db.Classes.findAll();
-				return res.status(200).json(search);
-			}
-
-			const search = await db.Classes.findAll({
-				where: query
-			});
-
-			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
-
-			res.status(200).json(search);
-		} catch (err) {
-
-			res.status(500).json(err.message);
-		}
-	};
 
 	static findClass = async (req, res) => {
 
@@ -36,12 +15,49 @@ class ClassController {
 				}
 			});
 
-			if(!search) throw new Error(search);
+			if (!search) throw new Error(search);
 
 			res.status(200).json(search);
 		} catch (err) {
 
 			res.status(500).json('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+		}
+	};
+
+	static findClassCrowded = async (req, res) => {
+		const numberMaxOfStudent = 2;
+		try {
+			const matriculations = await db.Matriculations
+				.findAndCountAll({
+					attributes: ['class_id'],
+					group: ['class_id'],
+					having: literal(`count(class_id) >= ${numberMaxOfStudent}`)
+				});
+
+			res.status(200).json(matriculations.count);
+		} catch (err) {
+
+			res.status(500).json(err.message);
+		}
+	};
+
+	static findAllClasses = async (req, res) => {
+
+		const { start_date, end_date } = req.query;
+		const where = {};
+		start_date || end_date ? where.start_date = {} : null;
+		start_date ? where.start_date[Op.gte] = start_date : null;
+		end_date ? where.start_date[Op.lte] = end_date : null;
+
+		try {
+			const search = await db.Classes.findAll({ where });
+
+			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+
+			res.status(200).json(search);
+		} catch (err) {
+
+			res.status(500).json(err.message);
 		}
 	};
 
@@ -110,6 +126,22 @@ class ClassController {
 			console.log(search);
 
 			res.status(200).json(search);
+		} catch (err) {
+			res.status(500).json(err.message);
+		}
+	};
+
+	static restoreClass = async (req, res) => {
+		const { id } = req.params;
+
+		try {
+			const request = await db.Classes.restore({
+				where: { id: Number(id) }
+			});
+
+			console.log(request);
+
+			res.status(200).json(request);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}

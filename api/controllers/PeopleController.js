@@ -8,6 +8,29 @@ class PeopleController {
 		try {
 
 			if (!query) {
+				const search = await db.People.scope('all').findAll();
+				return res.status(200).json(search);
+			}
+
+			const search = await db.People.scope('all').findAll({
+				where: query
+			});
+
+			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+
+			res.status(200).json(search);
+		} catch (err) {
+
+			res.status(500).json(err.message);
+		}
+	};
+
+	static findAllPeopleActive = async (req, res) => {
+
+		const query = req.query;
+		try {
+
+			if (!query) {
 				const search = await db.People.findAll();
 				return res.status(200).json(search);
 			}
@@ -110,6 +133,22 @@ class PeopleController {
 		}
 	};
 
+	static restorePerson = async (req, res) => {
+		const { id } = req.params;
+
+		try {
+			const request = await db.People.restore({
+				where: { id: Number(id) }
+			});
+
+			console.log(request);
+
+			res.status(200).json(request);
+		} catch (err) {
+			res.status(500).json(err.message);
+		}
+	};
+
 	/* Matriculation Controller */
 
 	//Review this part 
@@ -117,12 +156,33 @@ class PeopleController {
 
 		try {
 
-			const search = await db.Matriculations.findAll();
+			const matriculations = await db.Matriculations.findAll();
 
-			res.status(200).json(search);
+			res.status(200).json(matriculations);
 		} catch (err) {
 
 			res.status(500).json(err.mensagem);
+		}
+	};
+
+	static findMatriculationsByClass = async (req, res) => {
+
+		const { class_id } = req.params;
+
+		try {
+			const matriculations = await db.Matriculations
+				.findAndCountAll({
+					where: {
+						class_id: Number(class_id),
+					},
+					order: [
+						['student_id', 'ASC' ]
+					]
+				});
+			res.status(200).json(matriculations);
+		} catch (err) {
+
+			res.status(500).json('nada aqui');
 		}
 	};
 
@@ -131,14 +191,10 @@ class PeopleController {
 		const { student_id } = req.params;
 
 		try {
+			const student = await db.People.findOne({ where: { id: Number(student_id) } });
+			const allMatriculationOfStudent = await student.getConfirmedMatriculations();
 
-			const search = await db.Matriculations.findAll({
-				where: {
-					student_id
-				}
-			});
-
-			res.status(200).json(search);
+			res.status(200).json(allMatriculationOfStudent);
 		} catch (err) {
 
 			res.status(500).json(err.message);
@@ -213,8 +269,7 @@ class PeopleController {
 	static removeStudentMatriculation = async (req, res) => {
 
 		const { student_id, matriculation_id } = req.params;
-		console.log('student_id : ' + student_id);
-		console.log('matriculation_id : ' + matriculation_id);
+
 		try {
 
 			const search = await db.Matriculations.destroy({
@@ -228,7 +283,7 @@ class PeopleController {
 
 			res.status(200).json('Success delete :,)');
 		} catch (err) {
-      
+
 			res.status(500).json(err.message);
 		}
 	};

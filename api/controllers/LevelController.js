@@ -114,6 +114,22 @@ class LevelController {
 			res.status(500).json(err.message);
 		}
 	};
+
+	static restoreLevel = async (req, res) => {
+		const { id } = req.params;
+
+		try {
+			const request = await db.Levels.restore({
+				where: { id: Number(id)}
+			});
+
+			console.log(request);
+
+			res.status(200).json(request);
+		} catch (err) {
+			res.status(500).json(err.message);
+		}
+	};
 }
 
 
