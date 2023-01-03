@@ -7,18 +7,19 @@ class PeopleController {
 		const query = req.query;
 		try {
 
-			if (!query) {
-				const search = await db.People.scope('all').findAll();
-				return res.status(200).json(search);
+			if (Object.values(query) == false) {
+
+				const people = await db.People.findAll();
+				return res.status(200).json(people);
 			}
 
-			const search = await db.People.scope('all').findAll({
+			const people = await db.People.findAll({
 				where: query
 			});
 
-			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+			if (!people) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
 
-			res.status(200).json(search);
+			res.status(200).json(people);
 		} catch (err) {
 
 			res.status(500).json(err.message);
@@ -31,11 +32,11 @@ class PeopleController {
 		try {
 
 			if (!query) {
-				const search = await db.People.findAll();
+				const search = await db.People.scope('justActive').findAll();
 				return res.status(200).json(search);
 			}
 
-			const search = await db.People.findAll({
+			const search = await db.People.scope('justActive').findAll({
 				where: query
 			});
 
@@ -133,6 +134,35 @@ class PeopleController {
 		}
 	};
 
+	static cancelPeople = async (req, res) => {
+
+		const { student_id } = req.params;
+
+		try {
+
+			await db.sequelize.transaction(async (t) => {
+
+				await db.People.update({ active: false }, {
+					where: {
+						id: Number(student_id)
+					}
+				}, { transaction: t });
+
+				await db.Matriculations.update({ status: 'canceled' }, {
+					where: {
+						student_id: Number(student_id)
+					}
+				}, { transaction: t });
+
+				res.status(200).json(`All matriculations of Student with ID ${student_id} have been canceled.`);
+			});
+
+		} catch (err) {
+
+			res.status(500).json(err.message);
+		}
+	};
+
 	static restorePerson = async (req, res) => {
 		const { id } = req.params;
 
@@ -176,7 +206,7 @@ class PeopleController {
 						class_id: Number(class_id),
 					},
 					order: [
-						['student_id', 'ASC' ]
+						['student_id', 'ASC']
 					]
 				});
 			res.status(200).json(matriculations);

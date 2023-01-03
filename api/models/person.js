@@ -21,14 +21,11 @@ module.exports = (sequelize, DataTypes) => {
 		},
 		role: DataTypes.STRING
 	}, {
-		defaultScope: {
-			where: {
-				active: true
-			}
-		},
 		scopes: {
-			all: {
-				where: {}
+			justActive:  {
+				where: {
+					active: true
+				}
 			}
 		},
 		paranoid: true

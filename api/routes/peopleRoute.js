@@ -4,11 +4,12 @@ const PeopleController = require('../controllers/PeopleController');
 const peopleRouter = Router();
 
 peopleRouter
-	.get('/people/', PeopleController.findAllPeopleActive)
-	.get('/people/all', PeopleController.findAllPeople)
+	.get('/people', PeopleController.findAllPeople)
+	.get('/people/active', PeopleController.findAllPeopleActive)
 	.get('/people/:id', PeopleController.findPerson)
 	.post('/people', PeopleController.addPerson)
 	.post('/people/:id/restore', PeopleController.restorePerson)
+	.post('/people/:student_id/cancel', PeopleController.cancelPeople)
 	.put('/people/:id', PeopleController.updatePerson)
 	.delete('/people/:id', PeopleController.removePersonById)
 	.delete('/people/', PeopleController.removePersonByQuery)
