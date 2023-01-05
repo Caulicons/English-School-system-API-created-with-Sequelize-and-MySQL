@@ -30,7 +30,7 @@ class LevelController {
 		const { id } = req.params;
 
 		try {
-			const level = await Service.getRegistryByID(id)
+			const level = await Service.getRegistryByID(id);
 
 			if(!level) throw new Error(level);
 
@@ -48,7 +48,7 @@ class LevelController {
 
 		try {
 
-			const updateLevel = await Service.updateRegistry(updateData, id)
+			const updateLevel = await Service.updateRegistry(updateData, id);
 
 			if ( updateLevel == false) throw new Error('Not found Level with this ID');
 			res.status(200).json( 
@@ -96,7 +96,7 @@ class LevelController {
 		const { id } = req.params;
 
 		try {
-			const levelRestore = await Service.restoreRegistryByID(id)
+			const levelRestore = await Service.restoreRegistryByID(id);
 
 			if (!levelRestore) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
 			res.status(200).json(' Restaure level with successes!');

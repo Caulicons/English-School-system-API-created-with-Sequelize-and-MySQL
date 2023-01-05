@@ -1,6 +1,6 @@
 const Service = require('./Service');
 const { literal } = require('sequelize');
-const database = require('../models')
+const database = require('../models');
 
 class ClassesService extends Service {
   constructor() {

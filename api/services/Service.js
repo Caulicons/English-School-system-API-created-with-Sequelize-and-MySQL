@@ -6,7 +6,7 @@ class Services {
   }
 
   getAllRegistry = async (where = {}) => {
-    console.log(where)
+    console.log(where);
     return await database[this.moduleName].findAll({ where });
   };
 
