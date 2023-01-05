@@ -15,11 +15,19 @@ module.exports = (sequelize, DataTypes) => {
 			validate: {
 				isEmail: {
 					args: true,
-					msg: 'the text is not in the format email'
+					msg: 'The text is not in the format email'
 				}
 			}
 		},
-		role: DataTypes.STRING
+		role: {
+			type: DataTypes.STRING,
+			validate: {
+				isIn: {
+					args: ['estudante', 'docente'],
+					msg: 'The can only be "estudante" or "docente"'
+				}
+			}
+		}
 	}, {
 		scopes: {
 			justActive:  {
@@ -32,7 +40,8 @@ module.exports = (sequelize, DataTypes) => {
 	});
 	People.associate = function (models) {
 		People.hasMany(models.Classes, {
-			foreignKey: 'teacher_id'
+			foreignKey: 'teacher_id',
+			as: 'monitoredClasses'
 		});
 		People.hasMany(models.Matriculations, {
 			foreignKey: 'student_id',

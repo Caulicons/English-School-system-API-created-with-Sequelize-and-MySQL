@@ -1,45 +1,8 @@
-const db = require('../models');
-const { Op, literal } = require('sequelize');
-
+const ClassesService = require('../services/ClassesService');
+const { Op } = require('sequelize');
+const Service = new ClassesService();
 
 class ClassController {
-
-	static findClass = async (req, res) => {
-
-		const { id } = req.params;
-
-		try {
-			const search = await db.Classes.findOne({
-				where: {
-					id: Number(id)
-				}
-			});
-
-			if (!search) throw new Error(search);
-
-			res.status(200).json(search);
-		} catch (err) {
-
-			res.status(500).json('Não foi possível encontra a pessoa que solicitou, reveja as query...');
-		}
-	};
-
-	static findClassCrowded = async (req, res) => {
-		const numberMaxOfStudent = 2;
-		try {
-			const matriculations = await db.Matriculations
-				.findAndCountAll({
-					attributes: ['class_id'],
-					group: ['class_id'],
-					having: literal(`count(class_id) >= ${numberMaxOfStudent}`)
-				});
-
-			res.status(200).json(matriculations.count);
-		} catch (err) {
-
-			res.status(500).json(err.message);
-		}
-	};
 
 	static findAllClasses = async (req, res) => {
 
@@ -50,48 +13,80 @@ class ClassController {
 		end_date ? where.start_date[Op.lte] = end_date : null;
 
 		try {
-			const search = await db.Classes.findAll({ where });
+			const classes = await Service.getAllRegistry(where);
 
-			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+			if (!classes) throw new Error('Não foi possível encontra a Classe que solicitou, reveja as query...');
 
-			res.status(200).json(search);
+			res.status(200).json(classes);
 		} catch (err) {
 
+			res.status(500).json(err.message);
+		}
+	};
+
+	static findClass = async (req, res) => {
+
+		const { id } = req.params;
+
+		try {
+			const classes = await Service.getRegistryByID(id);
+
+			if (!classes) throw new Error(classes);
+
+			res.status(200).json(classes);
+		} catch (err) {
+
+			res.status(500).json('Não foi possível encontra a classe que solicitou, reveja as query...');
+		}
+	};
+
+	static findClassCrowded = async (req, res) => {
+
+		try {
+
+			const matriculations = await Service.getClassCrowded();
+			res.status(200).json(matriculations.count);
+		} catch (err) {
+			res.status(500).json(err.message);
+		}
+	};
+
+	static findAllClassMatriculations = async (req, res) => {
+		const { class_id } = req.params;
+		try {
+
+			const matriculations = await Service.getAllClassMatriculations(class_id);
+			res.status(200).json(matriculations);
+		} catch (err) {
 			res.status(500).json(err.message);
 		}
 	};
 
 	static updateClass = async (req, res) => {
 
-		const body = req.body;
+		const updateDate = req.body;
 		const { id } = req.params;
 
 		try {
 
-			const updatedPerson = await db.Classes.update(body, {
-				where: {
-					id: id
-				}
-			});
+			const updateClass = await Service.updateRegistry(updateDate, id);
+			if (updateClass == false) throw new Error('Not found matriculations with this ID');
 
-			console.log(updatedPerson);
-
-			res.status(200).json(updatedPerson);
+			res.status(200).json('Enrollment successfully edited!');
 		} catch (err) {
 
 			res.status(500).json(err.message);
 		}
-
 	};
 
 	static addClass = async (req, res) => {
 
-		const person = req.body;
+		const newClass = req.body;
 		try {
 
-			const personCreated = await db.Classes.create(person);
+			const classAdd = await Service.addRegistry(newClass);
 
-			res.status(200).json(personCreated);
+			res.status(200).json(classAdd);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}
@@ -101,31 +96,11 @@ class ClassController {
 
 		const { id } = req.params;
 		try {
-			const search = await db.Classes.destroy({
-				where: {
-					id: Number(id)
-				}
-			});
+			const classe = await Service.deleteRegistryByID(id);
 
-			if (search === 0) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			if (!classe) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
 
 			res.status(200).json('Success delete :,)');
-		} catch (err) {
-			res.status(500).json(err.message);
-		}
-	};
-
-	static removeClassByQuery = async (req, res) => {
-
-		const query = req.query;
-		try {
-			const search = await db.Classes.destroy({
-				where: query
-			});
-
-			console.log(search);
-
-			res.status(200).json(search);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}
@@ -135,13 +110,9 @@ class ClassController {
 		const { id } = req.params;
 
 		try {
-			const request = await db.Classes.restore({
-				where: { id: Number(id) }
-			});
-
-			console.log(request);
-
-			res.status(200).json(request);
+			const classe = await Service.restoreRegistryByID(id);
+			if (!classe) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			res.status(200).json(classe);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}

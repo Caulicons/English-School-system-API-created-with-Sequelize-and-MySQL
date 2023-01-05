@@ -4,12 +4,11 @@ const LevelController = require('../controllers/LevelController');
 const levelRouter = Router();
 
 levelRouter
-	.get('/level', LevelController.findAllLevels)
-	.get('/level/:id', LevelController.findLevel)
-	.post('/level', LevelController.addLevel)
-	.post('/level/:id/restore', LevelController.restoreLevel)
-	.put('/level/:id', LevelController.updateLevel)
-	.delete('/level/:id', LevelController.removeLevelById)
-	.delete('/level/', LevelController.removeLevelByQuery);
+	.get('/levels', LevelController.findAllLevels)
+	.get('/levels/:id', LevelController.findLevel)
+	.post('/levels', LevelController.addLevel)
+	.post('/levels/:id/restore', LevelController.restoreLevel)
+	.put('/levels/:id', LevelController.updateLevel)
+	.delete('/levels/:id', LevelController.removeLevelById);
     
 module.exports = levelRouter;

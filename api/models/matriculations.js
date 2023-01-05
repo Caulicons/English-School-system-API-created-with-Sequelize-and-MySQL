@@ -1,7 +1,15 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
 	const Matriculations = sequelize.define('Matriculations', {
-		status: DataTypes.STRING
+		status: {
+			type: DataTypes.STRING,
+			validate: {
+				isIn: {
+					args: ['confirmed', 'canceled'],
+					msg: 'The can only be "confirmed" or "canceled"'
+				}
+			}
+		}
 	}, {
 		paranoid: true
 	});

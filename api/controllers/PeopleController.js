@@ -1,5 +1,10 @@
-const db = require('../models');
 
+
+const { PeopleService } = require('../services');
+const Service = new PeopleService();
+
+const { MatriculationsService } = require('../services');
+const ServiceM = new MatriculationsService();
 class PeopleController {
 
 	static findAllPeople = async (req, res) => {
@@ -9,14 +14,11 @@ class PeopleController {
 
 			if (Object.values(query) == false) {
 
-				const people = await db.People.findAll();
+				const people = await Service.getAllRegistry();
 				return res.status(200).json(people);
 			}
 
-			const people = await db.People.findAll({
-				where: query
-			});
-
+			const people = await Service.getAllRegistry(query);
 			if (!people) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
 
 			res.status(200).json(people);
@@ -28,21 +30,11 @@ class PeopleController {
 
 	static findAllPeopleActive = async (req, res) => {
 
-		const query = req.query;
 		try {
 
-			if (!query) {
-				const search = await db.People.scope('justActive').findAll();
-				return res.status(200).json(search);
-			}
-
-			const search = await db.People.scope('justActive').findAll({
-				where: query
-			});
-
-			if (!search) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
-
-			res.status(200).json(search);
+			const peopleActive = await Service.getAllActivePeople();
+			if (!peopleActive) throw new Error('Não foi possível encontra a pessoa que solicitou, reveja as query...');
+			res.status(200).json(peopleActive);
 		} catch (err) {
 
 			res.status(500).json(err.message);
@@ -53,12 +45,8 @@ class PeopleController {
 
 		const { id } = req.params;
 		try {
-			const search = await db.People.findOne({
-				where: {
-					id: Number(id)
-				}
-			});
-			res.status(200).json(search);
+			const person = await Service.getRegistryByID(id);
+			res.status(200).json(person);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}
@@ -71,20 +59,12 @@ class PeopleController {
 
 		try {
 
-			const updatedPerson = await db.People.update(body, {
-				where: {
-					id: id
-				}
-			});
-
-			console.log(updatedPerson);
-
+			const updatedPerson = await Service.updateRegistry(body, id);
 			res.status(200).json(updatedPerson);
 		} catch (err) {
 
 			res.status(500).json(err.message);
 		}
-
 	};
 
 	static addPerson = async (req, res) => {
@@ -92,7 +72,7 @@ class PeopleController {
 		const person = req.body;
 		try {
 
-			const personCreated = await db.People.create(person);
+			const personCreated = await Service.addRegistry(person);
 
 			res.status(200).json(personCreated);
 		} catch (err) {
@@ -104,13 +84,9 @@ class PeopleController {
 
 		const { id } = req.params;
 		try {
-			const search = await db.People.destroy({
-				where: {
-					id: Number(id)
-				}
-			});
+			const person = await Service.deleteRegistryByID(id);
 
-			if (search === 0) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			if (!person) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
 
 			res.status(200).json('Success delete :,)');
 		} catch (err) {
@@ -122,11 +98,7 @@ class PeopleController {
 
 		const query = req.query;
 		try {
-			const search = await db.People.destroy({
-				where: query
-			});
-
-			console.log(search);
+			const search = await Service.getRegistryByQuery(query);
 
 			res.status(200).json(search);
 		} catch (err) {
@@ -140,23 +112,9 @@ class PeopleController {
 
 		try {
 
-			await db.sequelize.transaction(async (t) => {
+			await Service.cancelPerson(student_id);
 
-				await db.People.update({ active: false }, {
-					where: {
-						id: Number(student_id)
-					}
-				}, { transaction: t });
-
-				await db.Matriculations.update({ status: 'canceled' }, {
-					where: {
-						student_id: Number(student_id)
-					}
-				}, { transaction: t });
-
-				res.status(200).json(`All matriculations of Student with ID ${student_id} have been canceled.`);
-			});
-
+			res.status(200).json(`All matriculations of Student with ID ${student_id} have been canceled.`);
 		} catch (err) {
 
 			res.status(500).json(err.message);
@@ -167,11 +125,7 @@ class PeopleController {
 		const { id } = req.params;
 
 		try {
-			const request = await db.People.restore({
-				where: { id: Number(id) }
-			});
-
-			console.log(request);
+			const request = await Service.restoreRegistryByID(id);
 
 			res.status(200).json(request);
 		} catch (err) {
@@ -179,40 +133,15 @@ class PeopleController {
 		}
 	};
 
-	/* Matriculation Controller */
-
-	//Review this part 
-	static findAllMatriculation = async (req, res) => {
+	static findOneMatriculationOfStudent = async (req, res) => {
 
 		try {
 
-			const matriculations = await db.Matriculations.findAll();
-
-			res.status(200).json(matriculations);
+			const search = await Service.getAssociateFunctionByRoleID(req.params);
+			res.status(200).json(search);
 		} catch (err) {
 
-			res.status(500).json(err.mensagem);
-		}
-	};
-
-	static findMatriculationsByClass = async (req, res) => {
-
-		const { class_id } = req.params;
-
-		try {
-			const matriculations = await db.Matriculations
-				.findAndCountAll({
-					where: {
-						class_id: Number(class_id),
-					},
-					order: [
-						['student_id', 'ASC']
-					]
-				});
-			res.status(200).json(matriculations);
-		} catch (err) {
-
-			res.status(500).json('nada aqui');
+			res.status(500).json(err.message);
 		}
 	};
 
@@ -221,9 +150,8 @@ class PeopleController {
 		const { student_id } = req.params;
 
 		try {
-			const student = await db.People.findOne({ where: { id: Number(student_id) } });
-			const allMatriculationOfStudent = await student.getConfirmedMatriculations();
 
+			const allMatriculationOfStudent = await Service.getAllAssociateFunctionByRoleID(student_id);
 			res.status(200).json(allMatriculationOfStudent);
 		} catch (err) {
 
@@ -231,17 +159,14 @@ class PeopleController {
 		}
 	};
 
-	static findMatriculationOfStudent = async (req, res) => {
+	static findOneMonitoredClassOfTeacher = async (req, res) => {
 
-		const { student_id, matriculation_id } = req.params;
+		const roleIDs = req.params;
 		try {
 
-			const search = await db.Matriculations.findAll({
-				where: {
-					id: matriculation_id,
-					student_id
-				}
-			});
+
+
+			const search = await Service.getAssociateFunctionByRoleID(roleIDs);
 			res.status(200).json(search);
 		} catch (err) {
 
@@ -249,16 +174,47 @@ class PeopleController {
 		}
 	};
 
+	static findAllMonitoredClassesByTeacherID = async (req, res) => {
+
+		const { teacher_id } = req.params;
+
+		try {
+
+			const allMonitoredClasses = await Service.getAllAssociateFunctionByRoleID(teacher_id);
+			res.status(200).json(allMonitoredClasses);
+		} catch (err) {
+
+			res.status(500).json(err.message);
+		}
+	};
+
+	/* Matriculation Controller */
+
+	//Review this part 
+	static findMatriculationsByClass = async (req, res) => {
+
+		const { class_id } = req.params;
+
+		try {
+			const matriculations = await ServiceM.getMatriculationsByClassID(class_id);
+			res.status(200).json(matriculations);
+		} catch (err) {
+
+			res.status(500).json('no registration found');
+		}
+	};
+
 	static addStudentMatriculation = async (req, res) => {
 
 		const { student_id } = req.params;
-		const newRegistration = req.body;
+		const newMatriculation = {
+			...req.body,
+			student_id
+		};
+
 		try {
 
-			const search = await db.Matriculations.create({
-				...newRegistration,
-				student_id
-			});
+			const search = await ServiceM.addRegistry(newMatriculation);
 			res.status(200).json(search);
 		} catch (err) {
 
@@ -268,52 +224,50 @@ class PeopleController {
 
 	static updateStudentMatriculation = async (req, res) => {
 
-		const updateBody = req.body;
-		const { student_id, matriculation_id } = req.params;
+		const updateData = req.body;
+		const { matriculation_id } = req.params;
 
 		try {
 
-			const updatedMatriculation = await db.Matriculations.update(updateBody, {
-				where: {
-					id: matriculation_id,
-					student_id
-				}
-			});
+			const updatedMatriculation = await ServiceM.updateRegistry(updateData, matriculation_id);
 
-			if (!updatedMatriculation[0]) throw new Error();
+			if (!updatedMatriculation[0]) throw new Error('Não foi dessa vez meu caro, reveja os dados enviados');
 
-			const returnUpdateMatriculation = await db.Matriculations.findOne({
-				where: {
-					id: matriculation_id,
-					student_id
-				}
-			});
-			res.status(200).json(returnUpdateMatriculation);
+			res.status(200).json(
+				await ServiceM.getRegistryByID(matriculation_id)
+			);
 		} catch (err) {
-
-			res.status(500).json('Não foi dessa vez meu caro, reveja os dados enviados');
+			res.status(500).json(err.message);
 		}
 
 	};
 
 	static removeStudentMatriculation = async (req, res) => {
 
-		const { student_id, matriculation_id } = req.params;
+		const { matriculation_id } = req.params;
 
 		try {
 
-			const search = await db.Matriculations.destroy({
-				where: {
-					id: Number(matriculation_id),
-					student_id
-				}
-			});
+			const matriculationDeleted = await ServiceM.deleteRegistryByID(matriculation_id);
 
-			if (search === 0) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			if (!matriculationDeleted) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
 
 			res.status(200).json('Success delete :,)');
 		} catch (err) {
 
+			res.status(500).json(err.message);
+		}
+	};
+
+	static restaureStudentMatriculation = async (req, res) => {
+		const { matriculation_id } = req.params;
+
+		try {
+			const matriculationRestaure = await ServiceM.restoreRegistryByID(matriculation_id);
+
+			if (!matriculationRestaure) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			res.status(200).json(matriculationRestaure);
+		} catch (err) {
 			res.status(500).json(err.message);
 		}
 	};

@@ -6,6 +6,13 @@ module.exports = (sequelize, DataTypes) => {
 		paranoid: true
 	});
 	Classes.associate = function (models) {
+		Classes.hasMany(models.Matriculations, {
+			foreignKey: 'class_id',
+			scope: {
+				status: 'confirmed'
+			},
+			as: 'classeMatriculations'
+		});
 		Classes.belongsTo(models.People, {
 			foreignKey: 'teacher_id'
 		});

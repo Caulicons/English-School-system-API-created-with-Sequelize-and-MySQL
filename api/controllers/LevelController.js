@@ -1,5 +1,7 @@
 const db = require('../models');
+const LevelsService = require('../services/LevelsService');
 
+const Service = new LevelsService();
 class LevelController {
 
 	static findAllLevels = async (req, res) => {
@@ -8,17 +10,15 @@ class LevelController {
 		try {
 
 			if (!query) {
-				const search = await db.Levels.findAll();
-				return res.status(200).json(search);
+				const levels = await Service.getAllRegistry();
+				return res.status(200).json(levels);
 			}
 
-			const search = await db.Levels.findAll({
-				where: query
-			});
+			const levels = await Service.getAllRegistry(query);
 
-			if (!search) throw new Error('Não foi possível encontra o que solicitou, reveja as query...');
+			if (!levels[0]) throw new Error('Não foi possível encontra o que solicitou, reveja as query...');
 
-			res.status(200).json(search);
+			res.status(200).json(levels);
 		} catch (err) {
 
 			res.status(500).json(err.message);
@@ -30,15 +30,11 @@ class LevelController {
 		const { id } = req.params;
 
 		try {
-			const search = await db.Levels.findOne({
-				where: {
-					id: Number(id)
-				}
-			});
+			const level = await Service.getRegistryByID(id)
 
-			if(!search) throw new Error(search);
+			if(!level) throw new Error(level);
 
-			res.status(200).json(search);
+			res.status(200).json(level);
 		} catch (err) {
 
 			res.status(500).json('Não foi possível encontra a matricula que solicitou, reveja as query...');
@@ -47,22 +43,19 @@ class LevelController {
 
 	static updateLevel = async (req, res) => {
 
-		const body = req.body;
+		const updateData = req.body;
 		const { id } = req.params;
 
 		try {
 
-			const updatedPerson = await db.Levels.update(body, {
-				where: {
-					id: id
-				}
-			});
+			const updateLevel = await Service.updateRegistry(updateData, id)
 
-			console.log(updatedPerson);
-
-			res.status(200).json(updatedPerson);
+			if ( updateLevel == false) throw new Error('Not found Level with this ID');
+			res.status(200).json( 
+				await Service.getRegistryByID(id)
+			);
 		} catch (err) {
-
+			
 			res.status(500).json(err.message);
 		}
 
@@ -70,12 +63,12 @@ class LevelController {
 
 	static addLevel = async (req, res) => {
 
-		const person = req.body;
+		const newLevel = req.body;
 		try {
 
-			const personCreated = await db.Levels.create(person);
+			const levelCreated = await Service.addRegistry(newLevel);
 
-			res.status(200).json(personCreated);
+			res.status(200).json(levelCreated);
 		} catch (err) {
 			res.status(500).json(err.message);
 		}
@@ -99,40 +92,17 @@ class LevelController {
 		}
 	};
 
-	static removeLevelByQuery = async (req, res) => {
-
-		const query = req.query;
-		try {
-			const search = await db.Levels.destroy({
-				where: query
-			});
-
-			console.log(search);
-
-			res.status(200).json(search);
-		} catch (err) {
-			res.status(500).json(err.message);
-		}
-	};
-
 	static restoreLevel = async (req, res) => {
 		const { id } = req.params;
 
 		try {
-			const request = await db.Levels.restore({
-				where: { id: Number(id)}
-			});
+			const levelRestore = await Service.restoreRegistryByID(id)
 
-			console.log(request);
-
-			res.status(200).json(request);
+			if (!levelRestore) throw new Error('Não foi dessa vez meu caro..., reveja o ID');
+			res.status(200).json(' Restaure level with successes!');
 		} catch (err) {
 			res.status(500).json(err.message);
 		}
 	};
 }
-
-
-
-
 module.exports = LevelController;
